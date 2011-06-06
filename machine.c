@@ -13,7 +13,6 @@ void load_program(Machine *pmach,
 	pmach->_dataend = dataend;
 }
 
-
 /**
  * Fonction d'affichage des registres
  * */
@@ -44,4 +43,29 @@ void print_cpu(Machine *pmach);
    printf("SP : %x %d\n",pmach->_sp, pmach->_sp);
 }
 
+void read_program(Machine *mach, const char *programfile)
+{
+  
+}
 
+void dump_memory(Machine *pmach)
+{
+  
+}
+
+
+void print_program(Machine *pmach)
+{
+  
+}
+
+
+void print_data(Machine *pmach)
+{
+  
+}
+
+void simul(Machine *pmach, bool debug)
+{
+  
+}
