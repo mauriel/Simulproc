@@ -1,9 +1,44 @@
 #include "instruction.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+void print_register(Instruction instr) {
+	if ((int) instr.instr_generic._regcond < 10) {
+		printf("R0%d, ", (int) instr.instr_generic._regcond);
+	} else {
+		printf("R%d, ", (int) instr.instr_generic._regcond);
+	}
+}
+
+void print_condition(Instruction instr) {
+	switch (instr.instr_generic._regcond) {
+		case NC:
+			printf("NC ");
+			break;
+		case EQ:
+			printf("EQ ");
+			break;
+		case NE:
+			printf("NE ");
+			break;
+		case GT:
+			printf("GT ");
+			break;
+		case GE:
+			printf("GE ");
+			break;
+		case LT:
+			printf("LT ");
+			break;
+		case LE:
+			printf("LE ");
+			break;
+	}
+}
 
 void print_instruction(Instruction instr, unsigned addr) {
-	//printf("%x ", addr);
-	switch(instr.instr_generic._cop) {
+	switch (instr.instr_generic._cop) {
 		case ILLOP:
 			printf("ILLOP ");
 			break;
@@ -12,45 +47,45 @@ void print_instruction(Instruction instr, unsigned addr) {
 			break;
 		case LOAD:
 			printf("LOAD ");
-			printf("R%d, ", instr.instr_generic._regcond);
+			print_register(instr);
 			if (instr.instr_generic._immediate) { // I = 1 
 				printf("%d", instr.instr_immediate._value);
 			} else { // I = 0
 				if (instr.instr_generic._indexed) { // X = 1
-					printf("@%d", instr.instr_absolute._address);
+					printf("@%d", (int) instr.instr_absolute._address);
 				} else { // X = 0
-					printf("@%d", instr.instr_absolute._address);
+					printf("@%d", (int) instr.instr_absolute._address);
 				}
 			}
 			break;
 		case STORE:
 			printf("STORE ");
-			printf("R%d, ", instr.instr_generic._regcond);
+			print_register(instr);
 			break;
 		case ADD:
 			printf("ADD ");
-			printf("R%d, ", instr.instr_generic._regcond);
+			print_register(instr);
 			break;
 		case SUB:
 			printf("SUB ");
-			printf("R%d, ", instr.instr_generic._regcond);
+			print_register(instr);
 			if (instr.instr_generic._immediate) { // I = 1	
 				printf("#%d", instr.instr_immediate._value);				
 			} else {
-				if (instr.instr_generic._indexed) {
-					printf("@%d", instr.instr_absolute._address);
+				if (instr.instr_generic._indexed) { // X = 1
+					printf("@%d", (int) instr.instr_absolute._address);
+				} else { // X = 0
+					printf("@%d", (int) instr.instr_absolute._address);
 				}
 			}
 			break;
 		case BRANCH:
 			printf("BRANCH ");
-			printf("%d", instr.instr_generic._regcond);
-			print_condition();
+			print_condition(instr);
 			break;
 		case CALL:
 			printf("CALL ");
-			printf("%d", instr.instr_generic._regcond);
-			print_condition();
+			print_condition(instr);
 			break;
 		case RET:
 			printf("RET ");
