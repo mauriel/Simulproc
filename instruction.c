@@ -3,49 +3,47 @@
 #include <stdlib.h>
 #include <string.h>
 
+/*
+ * Affiche le registre.
+ */
 void print_register(Instruction instr) {
-	if ((int) instr.instr_generic._regcond < 10) {
-		printf("R0%d, ", (int) instr.instr_generic._regcond);
-	} else {
-		printf("R%d, ", (int) instr.instr_generic._regcond);
-	}
+	printf("R%02d, ", (int) instr.instr_generic._regcond);
 }
 
+/*
+ * Affiche le code condition.
+ */
 void print_condition(Instruction instr) {
 	switch (instr.instr_generic._regcond) {
 		case NC:
-			printf("NC");
-			break;
+			printf("NC "); break;
 		case EQ:
-			printf("EQ");
-			break;
+			printf("EQ "); break;
 		case NE:
-			printf("NE");
-			break;
+			printf("NE "); break;
 		case GT:
-			printf("GT");
-			break;
+			printf("GT "); break;
 		case GE:
-			printf("GE");
-			break;
+			printf("GE "); break;
 		case LT:
-			printf("LT");
-			break;
+			printf("LT "); break;
 		case LE:
-			printf("LE");
-			break;
+			printf("LE "); break;
 	}
 }
 
+/*
+ * Affiche les opérandes.
+ */
 void print_op(Instruction instr) {
-	if (instr.instr_generic._immediate) { // I = 1, immediat
+	if (instr.instr_generic._immediate) { // Si I = 1 : Immediat
 		printf("#%d", instr.instr_immediate._value);
-	} else { // I = 0				
-		if (instr.instr_generic._indexed) { // X = 1, adressage indexe
-			printf("%+d[", (int) instr.instr_indexed._offset);
-			printf("R%02d]", (int) instr.instr_indexed._rindex);
-		} else { // X = 0, adressage direct
-			printf(", @%04x", (int) instr.instr_absolute._address);	
+	} else {				
+		if (instr.instr_generic._indexed) { // Si I = 0 et X = 1 : Adressage indexe
+			printf("%+d[", (int) instr.instr_indexed._offset); // Offset sous la forme +/-offset
+			printf("R%02d]", (int) instr.instr_indexed._rindex); // Registre pour l'adressage indirect [R..]
+		} else { // Si I = 0 et X = 0 : Adressage direct
+			printf("@%04x", (int) instr.instr_absolute._address);	
 		}
 	}
 }
@@ -55,12 +53,12 @@ void print_instruction(Instruction instr, unsigned addr) {
 		case ILLOP:
 			//cop_names[ILLOP] = "ILLOP";
 			//printf("%s ", cop_names[0]);
-			printf("ILLOP ");
+			printf("ILLOP "); 
 			break;
 		case NOP:
 			//cop_names[NOP] = "NOP";
 			//printf("%s ", cop_names[NOP]);
-			printf("NOP ");
+			printf("NOP "); 
 			break;
 		case LOAD:
 			//cop_names[LOAD] = "LOAD";
