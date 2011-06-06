@@ -13,3 +13,36 @@ void load_program(Machine *pmach,
 	pmach->_dataend = dataend;
 }
 
+void read_program(Machine *mach, const char *programfile)
+{
+  
+}
+
+void dump_memory(Machine *pmach)
+{
+  
+}
+
+
+void print_program(Machine *pmach)
+{
+  
+}
+
+
+void print_data(Machine *pmach)
+{
+  
+}
+
+
+void print_cpu(Machine *pmach)
+{
+  
+}
+
+
+void simul(Machine *pmach, bool debug)
+{
+  
+}
