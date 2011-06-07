@@ -23,7 +23,7 @@ void check_register(Instruction instr,unsigned addr) {
 }
 
 /**
-* 
+* Verifie que sp ne dépasse pas la pile
 **/
 void check_stack(Machine *pmach,unsigned addr) {
 	if (pmach->_sp < 0 || pmach->_sp > pmach->_datasize)
@@ -32,7 +32,7 @@ void check_stack(Machine *pmach,unsigned addr) {
 
 
 /**
-*
+* Verifie que l'instruction n'est pas immediate
 **/
 void check_immediate(Instruction instr,unsigned addr) {
 	if (instr.instr_generic._immediate)
@@ -40,13 +40,16 @@ void check_immediate(Instruction instr,unsigned addr) {
 }
 
 /**
-*
+* Verifie qu'il n'y a pas d'erreurs sur les conditions (condition inconnue)
 **/
 void check_condition(Instruction instr,unsigned addr) {
 	if (instr.instr_generic._regcond<0 || instr.instr_generic._regcond>7)
 		error(ERR_CONDITION,addr);
 }
 
+/**
+* Verifie si la condition imposee est respectee
+**/
 bool allowed_condition(Machine *pmach,Instruction instr) {
 	switch (instr.instr_generic._regcond) {
 		case NC: //Pas de condition
@@ -68,7 +71,7 @@ bool allowed_condition(Machine *pmach,Instruction instr) {
 
 
 /**
-*
+* Permet de récupérer l'adresse pour un registre indexe avec offset
 **/
 unsigned int get_addr(Machine *pmach,Instruction instr) {
 	return pmach->_registers[instr.instr_indexed._rindex] + instr.instr_indexed._offset;
@@ -249,6 +252,9 @@ bool pop(Machine *pmach, Instruction instr,unsigned addr) {
 	return true;
 }
 
+/**
+* Decode et execute une instruction
+**/
 bool decode_execute(Machine *pmach, Instruction instr) {
 	unsigned addr = pmach->_pc-1;
 	switch (instr.instr_generic._cop) {
@@ -282,6 +288,9 @@ bool decode_execute(Machine *pmach, Instruction instr) {
 	}
 }
 
+/**
+* Affiche la trace d'une instruction
+**/
 void trace(const char *msg, Machine *pmach, Instruction instr, unsigned addr) {
 	printf("TRACE: %s: 0x%04x: ",msg,addr);
 	print_instruction(instr,addr);
