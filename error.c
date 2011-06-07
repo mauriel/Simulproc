@@ -5,46 +5,51 @@
 
 
 void error(Error err, unsigned addr){
+		perror("ERROR: ");
 		switch (err) {
 		case  ERR_NOERROR:
-			printf("%d: No error",addr);
+			perror("No error");
+			printf("\t0x%08x\n",addr);
 			break;
 		case ERR_UNKNOWN:
-			printf("%d: ",addr);
 			perror("Unknown instruction");
+			printf("\t0x%08x\n",addr);
+			exit(0);
 			break;
 		case ERR_ILLEGAL:
-			printf("%d: ",addr);
 			perror("Illegal instruction");
+			printf("\t0x%08x\n",addr);
+			exit(0);
 			break;
 		case ERR_CONDITION:
-			printf("%d: ",addr);
 			perror("Illegal condition");
+			printf("\t0x%08x\n",addr);
+			exit(0);
 			break;
 		case ERR_IMMEDIATE:
-			printf("%d: ",addr);
 			perror("Immediate value forbidden");
+			printf("\t0x%08x\n",addr);
+			exit(0);
 			break;
 		case ERR_SEGTEXT:
-			printf("%d: ",addr);
 			perror("Text index out of bounds");
+			printf("\t0x%08x\n",addr);
+			exit(0);
 			break;
 		case ERR_SEGDATA:
-			printf("%d: ",addr);
 			perror("Data index out of bounds");
+			printf("\t0x%08x\n",addr);
+			exit(0);
 			break;
 		case ERR_SEGSTACK:
-			printf("%d: ",addr);
 			perror("Stack index out of bounds");
+			printf("\t0x%08x\n",addr);
+			exit(0);
 			break;
 		}
 }
 
 void warning(Warning warn, unsigned addr){
-		switch (warn) {
-			case  WARN_HALT:
-				printf("%d: Warning",addr);
-				break;
-		}
+	printf("WARNING: Program correctly ended by HALT\t0x%08x\n",addr);
 }
 
