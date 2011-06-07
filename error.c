@@ -4,69 +4,40 @@
 #include <math.h>
 
 
-void error(Error err, unsigned addr) __attribute__((noreturn)){
+void error(Error err, unsigned addr){
 		switch (err) {
 		case  ERR_NOERROR:
 			printf("%d: No error",addr);
 			break;
 		case ERR_UNKNOWN:
-			printf("%d: Unknown instruction",addr);
-			exit(0);
+			printf("%d: ",addr);
+			perror("Unknown instruction");
 			break;
 		case ERR_ILLEGAL:
-			printf("%d: Illegal instruction",addr);
-			exit(0);
+			printf("%d: ",addr);
+			perror("Illegal instruction");
+			break;
+		case ERR_CONDITION:
+			printf("%d: ",addr);
+			perror("Illegal condition");
 			break;
 		case ERR_IMMEDIATE:
-			printf("%d: Immediate value forbidden",addr);
-			exit(0);
+			printf("%d: ",addr);
+			perror("Immediate value forbidden");
 			break;
 		case ERR_SEGTEXT:
-			printf("%d: Text index out of bounds",addr);
-			exit(0);
+			printf("%d: ",addr);
+			perror("Text index out of bounds");
 			break;
 		case ERR_SEGDATA:
-			printf("%d: Data index out of bounds",addr);
-			exit(0);
+			printf("%d: ",addr);
+			perror("Data index out of bounds");
 			break;
 		case ERR_SEGSTACK:
-			printf("%d: Stack index out of bounds",addr);
-			exit(0);
+			printf("%d: ",addr);
+			perror("Stack index out of bounds");
 			break;
-	}
-}
-
-
-void error(Error err, unsigned addr){
-	switch (err) {
-		case  ERR_NOERROR:
-			printf("%d: No error",addr);
-			break;
-		case ERR_UNKNOWN:
-			printf("%d: Unknown instruction",addr);
-			exit(0);
-			break;
-		case ERR_ILLEGAL:
-			printf("%d: Illegal instruction",addr);
-			exit(0);
-			break;
-		case ERR_IMMEDIATE:
-			printf("%d: Immediate value forbidden",addr);
-			exit(0);
-			break;
-		case ERR_SEGTEXT:
-			printf("%d: Text index out of bounds",addr);
-			exit(0);
-			break;
-		case ERR_SEGDATA:
-			printf("%d: Data index out of bounds",addr);
-			exit(0);
-			break;
-		case ERR_SEGSTACK:
-			printf("%d: Stack index out of bounds",addr);
-			exit(0);
-			break;
-	}
+		}
 }
 
 void warning(Warning warn, unsigned addr){
