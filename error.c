@@ -1,9 +1,22 @@
+/*!
+ * \file error.c
+ * \brief Messages et codes d'erreurs.
+ */
+
 #include "error.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
-
+//! Affichage d'une erreur et fin du simulateur
+/*!
+ * \note Toutes les erreurs étant fatales on ne revient jamais de cette
+ * fonction. L'attribut \a noreturn est une extension (non standard) de GNU C
+ * qui indique ce fait.
+ * 
+ * \param err code de l'erreur
+ * \param addr adresse de l'erreur
+ */
 void error(Error err, unsigned addr){
 		printf("ERROR: ");
 		switch (err) {
@@ -49,7 +62,12 @@ void error(Error err, unsigned addr){
 		}
 }
 
+//! Affichage d'un avertissement
+/*!
+ * \param warn code de l'avertissement
+ * \param addr adresse de l'erreur
+ */
 void warning(Warning warn, unsigned addr){
-	printf("WARNING: Program correctly ended by HALT\t0x%08x\n",addr);
+	printf("WARNING: Program correctly ended by HALT\tat 0x%08x\n",addr);
 }
 
