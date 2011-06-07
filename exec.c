@@ -90,17 +90,39 @@ bool store(Machine *pmach, Instruction instr,unsigned addr) {
 bool add(Machine *pmach, Instruction instr,unsigned addr) {
 	check_register(instr,addr);
 	if (instr.instr_generic._immediate) { // Si I = 1 : Immediat
-		pmach->_registers[instr.instr_generic._regcond]=instr.instr_immediate._value;
+		pmach->_registers[instr.instr_generic._regcond]+=instr.instr_immediate._value;
 	} else {				
 		if (instr.instr_generic._indexed) { // Si I = 0 et X = 1 : Adressage indexe
 			unsigned int addr_data = get_addr(pmach,instr);
 			check_data_addr(pmach,addr_data,addr);
-			pmach->_registers[instr.instr_generic._regcond]=pmach->_data[addr_data];	
+			pmach->_registers[instr.instr_generic._regcond]+=pmach->_data[addr_data];	
 		} else { // Si I = 0 et X = 0 : Adressage direct
 			check_data_addr(pmach,instr.instr_absolute._address,addr);
-			pmach->_registers[instr.instr_generic._regcond]=pmach->_data[instr.instr_absolute._address];
+			pmach->_registers[instr.instr_generic._regcond]+=pmach->_data[instr.instr_absolute._address];
 		}
 	}
+	refresh_cc(pmach,pmach->_registers[instr.instr_generic._regcond]);
+	return true;
+}
+
+/**
+* Decode et execute la fonction SUB
+**/
+bool sub(Machine *pmach, Instruction instr,unsigned addr) {
+	check_register(instr,addr);
+	if (instr.instr_generic._immediate) { // Si I = 1 : Immediat
+		pmach->_registers[instr.instr_generic._regcond]-=instr.instr_immediate._value;
+	} else {				
+		if (instr.instr_generic._indexed) { // Si I = 0 et X = 1 : Adressage indexe
+			unsigned int addr_data = get_addr(pmach,instr);
+			check_data_addr(pmach,addr_data,addr);
+			pmach->_registers[instr.instr_generic._regcond]-=pmach->_data[addr_data];	
+		} else { // Si I = 0 et X = 0 : Adressage direct
+			check_data_addr(pmach,instr.instr_absolute._address,addr);
+			pmach->_registers[instr.instr_generic._regcond]-=pmach->_data[instr.instr_absolute._address];
+		}
+	}
+	refresh_cc(pmach,pmach->_registers[instr.instr_generic._regcond]);
 	return true;
 }
 
