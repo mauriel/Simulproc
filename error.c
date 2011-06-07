@@ -8,41 +8,41 @@ void error(Error err, unsigned addr){
 		perror("ERROR: ");
 		switch (err) {
 		case  ERR_NOERROR:
-			perror("No error\n");
+			perror("No error");
 			printf("\t0x%08x\n",addr);
 			break;
 		case ERR_UNKNOWN:
-			perror("Unknown instruction\n");
+			perror("Unknown instruction");
 			printf("\t0x%08x\n",addr);
 			exit(0);
 			break;
 		case ERR_ILLEGAL:
-			perror("Illegal instruction\n");
+			perror("Illegal instruction");
 			printf("\t0x%08x\n",addr);
 			exit(0);
 			break;
 		case ERR_CONDITION:
-			perror("Illegal condition\n");
+			perror("Illegal condition");
 			printf("\t0x%08x\n",addr);
 			exit(0);
 			break;
 		case ERR_IMMEDIATE:
-			perror("Immediate value forbidden\n");
+			perror("Immediate value forbidden");
 			printf("\t0x%08x\n",addr);
 			exit(0);
 			break;
 		case ERR_SEGTEXT:
-			perror("Text index out of bounds\n");
+			perror("Text index out of bounds");
 			printf("\t0x%08x\n",addr);
 			exit(0);
 			break;
 		case ERR_SEGDATA:
-			perror("Data index out of bounds\n");
+			perror("Data index out of bounds");
 			printf("\t0x%08x\n",addr);
 			exit(0);
 			break;
 		case ERR_SEGSTACK:
-			perror("Stack index out of bounds\n");
+			perror("Stack index out of bounds");
 			printf("\t0x%08x\n",addr);
 			exit(0);
 			break;
