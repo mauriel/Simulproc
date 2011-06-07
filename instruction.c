@@ -1,5 +1,5 @@
 /*!
- * \file instruction.h
+ * \file instruction.c
  * \brief Description du jeu d'instruction.
  */
 
