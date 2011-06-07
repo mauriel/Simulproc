@@ -31,43 +31,60 @@
  */
 void read_program(Machine *pmach, const char *programfile)
 {
+//  printf("Entree dans read_program\n");
   int bits_read;
   unsigned textsize;
-  Instruction text[textsize];
   unsigned datasize;
-  Word data[datasize];
   unsigned dataend;
   //Ouverture du fichier :
   int handle = open(programfile,O_RDONLY);
-
+  if(handle < 0)
+    perror("Erreur d'ouverture du fichier binaire dans <machine.c:read_program>");
+/*  else
+    printf("Ouverture réussie, fd = %d\n",handle);
+*/
   if( (bits_read = read(handle, &textsize, sizeof(textsize))) != sizeof(textsize))
     perror("Erreur de lecture de 'textsize' dans <machine.c:read_program>");// dans '%s': %d bits lus au lieu de %d",programfile,bits_read,sizeof(textsize));
-  
+/*  else
+    printf("Lecture de textsize réussie: %d\n",textsize);
+*/
   if( (bits_read = read(handle, &datasize, sizeof(datasize))) != sizeof(pmach->_datasize))
     perror("Erreur de lecture de 'datasize' dans <machine.c:read_program>");//dans '%s': %d bits lus au lieu de %d",programfile,bits_read,sizeof(datasize));
-  
+/*  else
+    printf("Lecture de datasize réussie: %d\n",datasize);
+*/
   if( (bits_read = read(handle, &dataend, sizeof(dataend))) != sizeof(dataend))
     perror("Erreur de lecture de 'dataend' dans <machine.c:read_program>");// '%s': %d bits lus au lieu de %d",programfile,bits_read,sizeof(dataend));
-
+/*  else
+    printf("Lecture de dataend réussie: %08x\n",dataend);
+*/
+  Instruction *text = malloc(textsize * sizeof(Instruction));
   //lecture des instructions :
+  printf("Lecture de text:\n");
     for(int i = 0 ; i < textsize ; i++)
     {
-      if( (bits_read = read(handle, &text[i], sizeof(text[textsize]))) != sizeof(text[textsize]))
+      if( (bits_read = read(handle, &text[i], sizeof(text[0]))) != sizeof(text[0]))
 	perror("Erreur de lecture de 'text' dans <machine.c:read_program>");
       else
-      printf("data[%03d]: 0x%08x\n", i, pmach->_text[i]._raw);
+	printf("text[%03d]: 0x%08x\n", i,text[i]);
     }
 
+  Word *data = malloc(datasize * sizeof(Word));
   //lecture des données :
-    for(int i = 0 ; i < datasize ; i++)
+  printf("\nLecture de data:\n");
+  for(int i = 0 ; i < datasize ; i++)
     {
-      if( (bits_read = read(handle, &data[i], sizeof(data[datasize]))) != sizeof(data[datasize]))
+      if( (bits_read = read(handle, &data[i], sizeof(data[0]))) != sizeof(data[0]))
 	perror("Erreur de lecture de 'data' dans <machine.c:read_program>");
       else
-      printf("data[%03d]: 0x%08x\n", i, pmach->_data[i]);
+      printf("data[%03d]: 0x%08x\n", i, data[i]);
     }
-    
-    load_program(pmach,textsize, text[textsize], datasize, data[datasize], dataend)
+
+  //Fermeture du fichier :
+  if(close(handle) != 0)
+    perror("Erreur de fermeture du fichier binaire dans <machine.c:read_program>");
+
+  load_program(pmach, textsize, text, datasize, data, dataend);
 }
 
 void load_program(Machine *pmach,
@@ -80,8 +97,15 @@ void load_program(Machine *pmach,
 	pmach->_datasize = datasize;
 	pmach->_dataend = dataend;
 
+  //Mise à zéro des registres :
   for(int i = 0 ; i < NREGISTERS ; i++)
       pmach->_registers[i] = 0;
+  
+  //Init de SP ;
+  pmach->_sp = datasize-1;
+  //Mise à zéro de PC et CC :
+  pmach->_pc = 0;
+  pmach->_cc = CC_U;
 }
 
 void dump_memory(Machine *pmach)
@@ -90,15 +114,15 @@ void dump_memory(Machine *pmach)
 
   //Affichage du programme au format binaire:
   for(i = 0 ; i < pmach->_textsize ; i++)
-      printf("%x\n", pmach->_text[i]._raw);
+      printf("%08x\n", pmach->_text[i]._raw);
 
   //Affichage des données au format binaire:
   for(i = 0 ; i < pmach->_datasize ; i++)
-      printf("%x\n", pmach->_data[i]);
+      printf("%08x\n", pmach->_data[i]);
 
   int bits_read=0;
   //Ouverture du fichier en mode écriture seule + troncature
-  int handle = open("dump.prog",O_WRONLY|O_TRUNC);
+  int handle = open("dump.prog",O_WRONLY|O_TRUNC|O_CREAT);
 
   if( (bits_read = write(handle, &pmach->_textsize, sizeof(pmach->_textsize))) != sizeof(pmach->_textsize))
     perror("Erreur d'écriture de 'textsize' dans <machine.c:dump_memory>");// dans '%s': %d bits lus au lieu de %d",programfile,bits_read,sizeof(textsize));
@@ -108,27 +132,28 @@ void dump_memory(Machine *pmach)
   
   if( (bits_read = write(handle, &pmach->_dataend, sizeof(pmach->_dataend))) != sizeof(pmach->_dataend))
     perror("Erreur d'écriture de 'dataend' dans <machine.c:dump_memory>");// '%s': %d bits lus au lieu de %d",programfile,bits_read,sizeof(dataend));
-/*
+
   //ecriture des instructions :
-  unsigned int instruc[textsize];
-    for(int i = 0 ; i < textsize ; i++)
+    for(int i = 0 ; i < pmach->_textsize ; i++)
     {
-      if( (bits_read = write(handle, &instruc[i], sizeof(instruc[textsize]))) != sizeof(instruc[textsize]))
+      if( (bits_read = write(handle, &pmach->_text[i]._raw, sizeof(pmach->_text[0]._raw))) != sizeof(pmach->_text[0]._raw))
 	perror("Erreur d'écriture de 'instruc' dans <machine.c:dump_memory>.");
       else
-      printf("instruc[%03d]: 0x%08x\n", i, instruc[i]);
+      printf("instruc[%03d]: 0x%08x\n", i, pmach->_text[i]._raw);
     }
 
   //ecriture des données :
-  unsigned int data[datasize];
-    for(int i = 0 ; i < datasize ; i++)
+    for(int i = 0 ; i < pmach->_datasize ; i++)
     {
-      if( (bits_read = write(handle, &data[i], sizeof(data[datasize]))) != sizeof(data[datasize]))
+      if( (bits_read = write(handle, &pmach->_data[i], sizeof(pmach->_data[0]))) != sizeof(pmach->_data[0]))
 	perror("Erreur d'écriture de 'data' dans <machine.c:dump_memory>.");
       else
-      printf("data[%03d]: 0x%08x\n", i, data[i]);
+      printf("data[%03d]: 0x%08x\n", i, pmach->_data[i]);
     }
-  */
+
+  //Fermeture du fichier :
+  if(close(handle) != 0)
+    perror("Erreur de fermeture du fichier binaire dans <machine.c:read_program>");
 }
 
 void print_program(Machine *pmach)
@@ -164,17 +189,21 @@ void print_cpu(Machine *pmach)
 
 void print_data(Machine *pmach)
 {
-  printf("\n*** DATA (size: %d, end = 0x%08x (%d)) ***\n",pmach->_datasize,pmach->_datasize-1,pmach->_datasize-1);
+  printf("\n*** DATA (size: %d) ***\n",pmach->_datasize);
   for(int i = 0 ; i < pmach->_datasize ; i++)
       printf("0x%04x: 0x%08x %d\n", i, pmach->_data[i], pmach->_data[i]);
 }
 
 void simul(Machine *pmach, bool debug)
 {
-  while (pmach->_pc < pmach->_textsize){
-	if (debug)
-		debug = debug_ask(pmach);
-	decode_execute(pmach, pmach->_text[pmach->_pc]);
-	pmach->_pc++;
+  bool ret = true;
+  while (ret)
+  {
+    printf("TRACE: Executing:");
+    print_instruction(pmach->_text[pmach->_pc],pmach->_text[pmach->_pc].instr_absolute._address);
+    putchar('\n');
+    ret = decode_execute(pmach, pmach->_text[pmach->_pc++]);
+    if (debug)
+	    debug = debug_ask(pmach);
   }
 }
