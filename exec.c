@@ -257,7 +257,7 @@ bool call(Machine *pmach, Instruction instr, unsigned addr)
  */
 bool ret(Machine *pmach, Instruction instr, unsigned addr) {
 	check_stack(pmach, addr);
-	pmach->_pc = pmach->_data[--pmach->_sp];
+	pmach->_pc = pmach->_data[++pmach->_sp];
 	return true;
 }
 

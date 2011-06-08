@@ -27,42 +27,33 @@ void error(Error err, unsigned addr){
 		case ERR_UNKNOWN:
 			printf("Unknown instruction");
 			printf("\tat 0x%08x\n",addr);
-			exit(0);
-			break;
+			exit(1);
 		case ERR_ILLEGAL:
 			printf("Illegal instruction");
 			printf("\tat 0x%08x\n",addr);
-			exit(0);
-			break;
+			exit(1);
 		case ERR_CONDITION:
 			printf("Illegal condition");
 			printf("\tat 0x%08x\n",addr);
-			exit(0);
-			break;
+			exit(1);
 		case ERR_IMMEDIATE:
 			printf("Immediate value forbidden");
 			printf("\tat 0x%08x\n",addr);
-			exit(0);
-			break;
+			exit(1);
 		case ERR_SEGTEXT:
 			printf("Text index out of bounds");
 			printf("\tat 0x%08x\n",addr);
-			exit(0);
-			break;
+			exit(1);
 		case ERR_SEGDATA:
 			printf("Data index out of bounds");
 			printf("\tat 0x%08x\n",addr);
-			exit(0);
-			break;
+			exit(1);
 		case ERR_SEGSTACK:
 			printf("Stack index out of bounds");
 			printf("\tat 0x%08x\n",addr);
-			exit(0);
-			break;
+			exit(1);
 		default:
 			exit(0);
-			break;
-		
 		}
 		
 }
