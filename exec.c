@@ -257,8 +257,9 @@ bool call(Machine *pmach, Instruction instr, unsigned addr)
  * \param addr adresse de l'instruction en cours
  */
 bool ret(Machine *pmach, Instruction instr, unsigned addr) {
+	++pmach->_sp;
 	check_stack(pmach, addr);
-	pmach->_pc = pmach->_data[++pmach->_sp];
+	pmach->_pc = pmach->_data[pmach->_sp];
 	return true;
 }
 
@@ -278,6 +279,7 @@ bool push(Machine *pmach, Instruction instr, unsigned addr)
 		check_data_addr(pmach, address, addr);
 		pmach->_data[pmach->_sp--] = pmach->_data[address];	
 	}
+	check_stack(pmach, addr);
 	return true;
 }
 
@@ -293,7 +295,9 @@ bool pop(Machine *pmach, Instruction instr, unsigned addr)
 	check_immediate(instr,addr);	
 	unsigned int address = get_address(pmach, instr);
 	check_data_addr(pmach, address, addr);
-	pmach->_data[address] = pmach->_data[++pmach->_sp];	
+	++pmach->_sp;
+	check_stack(pmach, addr);
+	pmach->_data[address] = pmach->_data[pmach->_sp];	
 	return true;
 }
 

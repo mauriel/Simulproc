@@ -259,15 +259,17 @@ void print_data(Machine *pmach)
  */
 void simul(Machine *pmach, bool debug)
 {
+  bool stop=true;
   //decode_execute retourne false si on est à la fin du programme :
-  while (decode_execute(pmach, pmach->_text[pmach->_pc++]))
+  while (stop)
   {
-    if (pmach->_pc >= pmach->_textsize) {
-    	error(ERR_SEGTEXT, pmach->_pc - 1);
-    }
+   
     //On trace l'exécution courrante :
     trace("Executing", pmach, pmach->_text[pmach->_pc], pmach->_pc);
-    
+     if (pmach->_pc >= pmach->_textsize) {
+    	error(ERR_SEGTEXT, pmach->_pc - 1);
+    }
+    stop = decode_execute(pmach, pmach->_text[pmach->_pc++]);
     
     //Si on est en mode debug on ne fait qu'une ligne a la fois
     if (debug)
