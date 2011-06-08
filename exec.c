@@ -58,7 +58,7 @@ void check_immediate(Instruction instr, unsigned addr)
 
 void check_sizeimmediate(Machine *pmach,Instruction instr, unsigned addr)
 {
-	if(sizeof(instr.instr_immediate._value+pmach->_registers[instr.instr_generic._regcond])>sizeof(Word))
+	if(sizeof(instr.instr_immediate._value+pmach->_registers[instr.instr_generic._regcond])>sizeof(Word) || true)
 		error(ERR_IMMEDIATE,addr);
 }
 
