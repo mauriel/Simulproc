@@ -40,7 +40,7 @@ void check_register(Instruction instr, unsigned addr)
  */
 void check_stack(Machine *pmach, unsigned addr) 
 {
-	if (pmach->_sp < 0 || pmach->_sp > pmach->_datasize)
+	if (pmach->_sp <= 0 || pmach->_sp >= pmach->_datasize)
 		error(ERR_SEGSTACK,addr);
 }
 
@@ -58,7 +58,7 @@ void check_immediate(Instruction instr, unsigned addr)
 
 void check_sizeimmediate(Machine *pmach,Instruction instr, unsigned addr)
 {
-	if(sizeof(instr.instr_immediate._value+pmach->_registers[instr.instr_generic._regcond])>sizeof(Word))
+	if(sizeof(instr.instr_immediate._value+pmach->_registers[instr.instr_generic._regcond])>sizeof(Word) || true)
 		error(ERR_IMMEDIATE,addr);
 }
 
@@ -177,7 +177,7 @@ bool add(Machine *pmach, Instruction instr, unsigned addr)
 {
 	check_register(instr, addr);
 	if (instr.instr_generic._immediate) { // Immediat
-		check_sizeimmediate(pmach,instr,addr);
+		//check_sizeimmediate(pmach,instr,addr);
 		pmach->_registers[instr.instr_generic._regcond] += instr.instr_immediate._value;
 	} else {				
 		unsigned int address = get_address(pmach, instr);
@@ -238,7 +238,8 @@ bool branch(Machine *pmach, Instruction instr, unsigned addr)
 bool call(Machine *pmach, Instruction instr, unsigned addr) 
 {
 	check_immediate(instr, addr);	
-	check_condition(instr, addr);	
+	check_condition(instr, addr);
+	check_stack(pmach,addr);	
 	unsigned int address = get_address(pmach, instr);
 	check_data_addr(pmach, address, addr);
 	if (allowed_condition(pmach,instr)) {
