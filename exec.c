@@ -40,7 +40,7 @@ void check_register(Instruction instr, unsigned addr)
  */
 void check_stack(Machine *pmach, unsigned addr) 
 {
-	if (pmach->_sp <= 0 || pmach->_sp >= pmach->_datasize)
+	if (pmach->_sp < pmach->_dataend || pmach->_sp >= pmach->_datasize)
 		error(ERR_SEGSTACK,addr);
 }
 
