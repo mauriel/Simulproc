@@ -56,12 +56,6 @@ void check_immediate(Instruction instr, unsigned addr)
 		error(ERR_IMMEDIATE,addr);
 }
 
-void check_sizeimmediate(Machine *pmach,Instruction instr, unsigned addr)
-{
-	if(sizeof(instr.instr_immediate._value+pmach->_registers[instr.instr_generic._regcond])>sizeof(Word) || true)
-		error(ERR_IMMEDIATE,addr);
-}
-
 //! Vérifie qu'il n'y a pas d'erreurs sur le code condition (=> condition inconnue)
 /*!
  * \param instr instruction en cours
@@ -177,7 +171,6 @@ bool add(Machine *pmach, Instruction instr, unsigned addr)
 {
 	check_register(instr, addr);
 	if (instr.instr_generic._immediate) { // Immediat
-		//check_sizeimmediate(pmach,instr,addr);
 		pmach->_registers[instr.instr_generic._regcond] += instr.instr_immediate._value;
 	} else {				
 		unsigned int address = get_address(pmach, instr);
