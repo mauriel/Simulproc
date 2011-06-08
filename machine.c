@@ -42,13 +42,13 @@ void read_program(Machine *pmach, const char *programfile)
   if(handle < 0)
     perror("Erreur d'ouverture du fichier binaire dans <machine.c:read_program>");
 
-  if( (bits_read = read(handle, &textsize, sizeof(textsize))) != sizeof(textsize))
+  if( (bits_read = read(handle, &textsize, sizeof(pmach->_textsize))) != sizeof(pmach->_textsize))
     perror("Erreur de lecture de 'textsize' dans <machine.c:read_program>");// dans '%s': %d bits lus au lieu de %d",programfile,bits_read,sizeof(textsize));
 
-  if( (bits_read = read(handle, &datasize, sizeof(datasize))) != sizeof(pmach->_datasize))
+  if( (bits_read = read(handle, &datasize, sizeof(pmach->_datasize))) != sizeof(pmach->_datasize))
     perror("Erreur de lecture de 'datasize' dans <machine.c:read_program>");//dans '%s': %d bits lus au lieu de %d",programfile,bits_read,sizeof(datasize));
 
-  if( (bits_read = read(handle, &dataend, sizeof(dataend))) != sizeof(dataend))
+  if( (bits_read = read(handle, &dataend, sizeof(pmach->_dataend))) != sizeof(pmach->_dataend))
     perror("Erreur de lecture de 'dataend' dans <machine.c:read_program>");// '%s': %d bits lus au lieu de %d",programfile,bits_read,sizeof(dataend));
 
   Instruction *text = malloc(textsize * sizeof(Instruction));
@@ -67,10 +67,6 @@ void read_program(Machine *pmach, const char *programfile)
 
   //On charge le programme dans la machine :
   load_program(pmach, textsize, text, datasize, data, dataend);
-
-  //On libère la mémoire :
-  free(text);
-  free(data);
 }
 
 //! Chargement d'un programme
@@ -89,11 +85,9 @@ void load_program(Machine *pmach,
                   unsigned datasize, Word data[datasize],  unsigned dataend)
 {
   //Recopie des tableaux text...
-  pmach->_text = malloc(textsize * sizeof(Instruction));
-  memcpy(pmach->_text, text, textsize*sizeof(text));
+  pmach->_text = text;
   //...et data :
-  pmach->_data = malloc(datasize * sizeof(Word));
-  memcpy(pmach->_data, data, datasize*sizeof(data));
+  pmach->_data = data;
 
   //Init de textsize..
   pmach->_textsize = textsize;
@@ -184,6 +178,9 @@ void dump_memory(Machine *pmach)
   int bits_read=0;
   //Ouverture/creation du fichier en mode écriture seule + troncature
   int handle = open("dump.bin",O_WRONLY|O_TRUNC|O_CREAT);
+  if(handle < 0)
+    perror("Erreur d'ouverture du fichier binaire dans <machine.c:read_program>");
+
 
   if( (bits_read = write(handle, &pmach->_textsize, sizeof(pmach->_textsize))) != sizeof(pmach->_textsize))
     perror("Erreur d'écriture de 'textsize' dans <machine.c:dump_memory>");// dans '%s': %d bits lus au lieu de %d",programfile,bits_read,sizeof(textsize));
