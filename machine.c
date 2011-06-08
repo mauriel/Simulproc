@@ -122,62 +122,34 @@ void load_program(Machine *pmach,
  */
 void dump_memory(Machine *pmach)
 {
-  int i = 0;
-  
   //Affichage du programme au format binaire:
   printf("Instruction text[] = {\n");
-  for(i = 0 ; i < pmach->_textsize ; i+=4)
+  for(int i = 0 ; i < pmach->_textsize ; i++)
   {
-      printf("\t0x%08x, ", pmach->_text[i]._raw);
-      if( (i+1) < pmach->_textsize)
-	printf("0x%08x, ", pmach->_text[i+1]._raw);
-      else
-	putchar('\n');
-      if( (i+2) < pmach->_textsize)
-	printf("0x%08x, ", pmach->_text[i+2]._raw);
-      else
-	putchar('\n');
-      if( (i+3) < pmach->_textsize)
-	printf("0x%08x,\n", pmach->_text[i+3]._raw);
-      else
-	putchar('\n');
+    printf("\t0x%08x, ", pmach->_text[i]._raw);
+    if (i % 4 == 3 || (i == pmach->_textsize - 1) )
+      putchar('\n');
   }
   printf("};\n");
   printf("unsigned textsize = %d;\n", pmach->_textsize);
 
   printf("\nWord data[] = {\n");
   //Affichage des données au format binaire:
-  for(i = 0 ; i < pmach->_datasize ; i+=4)
+  for(int i = 0 ; i < pmach->_datasize ; i++)
   {
-      printf("\t0x%08x, ", pmach->_data[i]);
-      if( (i+1) < pmach->_datasize)
-	printf("0x%08x, ", pmach->_data[i+1]);
-      else
-      {
-	putchar('\n');
-	break;
-      }
-      if( (i+2) < pmach->_datasize)
-	printf("0x%08x, ", pmach->_data[i+2]);
-      else
-      {
-	putchar('\n');
-	break;
-      }      if( (i+3) < pmach->_datasize)
-	printf("0x%08x,\n", pmach->_data[i+3]);
-      else
-      {
-	putchar('\n');
-	break;
-      }
-  }  
+    printf("\t0x%08x, ", pmach->_data[i]);
+    if (i % 4 == 3)
+      putchar('\n');
+  }
+
+  putchar('\n');
   printf("};\n");
   printf("unsigned datasize = %d;\n", pmach->_datasize);
   printf("unsigned dataend = %d;\n", pmach->_dataend);
 
   int bits_read=0;
   //Ouverture/creation du fichier en mode écriture seule + troncature
-  int handle = open("dump.bin",O_WRONLY|O_TRUNC|O_CREAT);
+  int handle = open("dump.bin", O_WRONLY|O_TRUNC|O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
   if(handle < 0)
     perror("Erreur d'ouverture du fichier binaire dans <machine.c:read_program>");
 
@@ -191,19 +163,16 @@ void dump_memory(Machine *pmach)
   if( (bits_read = write(handle, &pmach->_dataend, sizeof(pmach->_dataend))) != sizeof(pmach->_dataend))
     perror("Erreur d'écriture de 'dataend' dans <machine.c:dump_memory>");// '%s': %d bits lus au lieu de %d",programfile,bits_read,sizeof(dataend));
 
-  //ecriture des instructions :
-    for(int i = 0 ; i < pmach->_textsize ; i++)
-    {
-      if( (bits_read = write(handle, &pmach->_text[i]._raw, sizeof(pmach->_text[0]._raw))) != sizeof(pmach->_text[0]._raw))
-	perror("Erreur d'écriture de 'instruc' dans <machine.c:dump_memory>.");
-    }
-
   //ecriture des données :
-    for(int i = 0 ; i < pmach->_datasize ; i++)
-    {
-      if( (bits_read = write(handle, &pmach->_data[i], sizeof(pmach->_data[0]))) != sizeof(pmach->_data[0]))
-	perror("Erreur d'écriture de 'data' dans <machine.c:dump_memory>.");
-    }
+  if( (bits_read = write(handle, &pmach->_data, sizeof(pmach->_data))) != sizeof(pmach->_data))
+    perror("Erreur d'écriture de 'datasize' dans <machine.c:dump_memory>");//dans '%s': %d bits lus au lieu de %d",programfile,bits_read,sizeof(datasize));
+
+  //ecriture des instructions :
+  for(int i = 0 ; i < pmach->_textsize ; i++)
+  {
+    if( (bits_read = write(handle, &pmach->_text[i]._raw, sizeof(pmach->_text[0]._raw))) != sizeof(pmach->_text[0]._raw))
+      perror("Erreur d'écriture de 'instruc' dans <machine.c:dump_memory>.");
+  }
 
   //Fermeture du fichier :
   if(close(handle) != 0)
@@ -249,18 +218,13 @@ void print_cpu(Machine *pmach)
    };
   putchar('\n');
   putchar('\n');
-  for(int i = 0 ; i < NREGISTERS ; i+=3)
+  for(int i = 0 ; i < NREGISTERS ; i++)
   {
-      printf("R%02d: 0x%08x\t%d\t", i, pmach->_registers[i], pmach->_registers[i]);
-      if( (i+1) < NREGISTERS)
-	printf("R%02d: 0x%08x\t%d\t", i+1, pmach->_registers[i+1], pmach->_registers[i+1]);
-      else
-	putchar('\n');
-      if( (i+2) < NREGISTERS)
-	printf("R%02d: 0x%08x\t%d\n", i+2, pmach->_registers[i+2], pmach->_registers[i+2]);
-      else
-	putchar('\n');
+    printf("R%02d: 0x%08x\t%d\t", i, pmach->_registers[i], pmach->_registers[i]);
+    if (i % 3 == 2)
+      putchar('\n');
   }
+  putchar('\n');
 }
 
 //! Affichage des données du programme
@@ -272,17 +236,12 @@ void print_cpu(Machine *pmach)
 void print_data(Machine *pmach)
 {
   printf("\n*** DATA (size: %d, end = 0x%08x %d) ***\n",pmach->_datasize, pmach->_dataend, pmach->_dataend);
-  for(int i = 0 ; i < pmach->_datasize ; i+=3)
+
+  for(int i = 0 ; i < pmach->_datasize ; i++)
   {
-      printf("0x%04x: 0x%08x %d\t", i, pmach->_data[i], pmach->_data[i]);
-      if( (i+1) < pmach->_datasize)
-	printf("0x%04x: 0x%08x %d\t", i+1, pmach->_data[i+1], pmach->_data[i+1]);
-      else
-	putchar('\n');
-      if( (i+2) < pmach->_datasize)
-	printf("0x%04x: 0x%08x %d\n", i+2, pmach->_data[i+2], pmach->_data[i+2]);
-      else
-	putchar('\n');
+    printf("0x%04x: 0x%08x %d\t", i, pmach->_data[i], pmach->_data[i]);
+    if (i % 3 == 2)
+      putchar('\n');
   }
   putchar('\n');
 }
