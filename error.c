@@ -20,7 +20,7 @@
 void error(Error err, unsigned addr){
 		printf("ERROR: ");
 		switch (err) {
-		case  ERR_NOERROR:
+		case ERR_NOERROR:
 			printf("No error");
 			printf("\tat 0x%08x\n",addr);
 			break;
@@ -59,7 +59,12 @@ void error(Error err, unsigned addr){
 			printf("\tat 0x%08x\n",addr);
 			exit(0);
 			break;
+		default:
+			exit(0);
+			break;
+		
 		}
+		
 }
 
 //! Affichage d'un avertissement
