@@ -89,11 +89,14 @@ void load_program(Machine *pmach,
                   unsigned datasize, Word data[datasize],  unsigned dataend)
 {
   //Recopie des tableaux text...
-  pmach->_text = malloc(textsize * sizeof(Instruction));
+  /*pmach->_text = malloc(textsize * sizeof(Instruction));
   memcpy(pmach->_text, text, textsize*sizeof(text));
   //...et data :
   pmach->_data = malloc(datasize * sizeof(Word));
-  memcpy(pmach->_data, data, datasize*sizeof(data));
+  memcpy(pmach->_data, data, datasize*sizeof(data));*/
+
+  pmach->_text = text;
+  pmach->_data = data;
 
   //Init de textsize..
   pmach->_textsize = textsize;
@@ -252,7 +255,7 @@ void print_cpu(Machine *pmach)
    };
   putchar('\n');
   putchar('\n');
-  for(int i = 0 ; i < NREGISTERS ; i+=3)
+  /*for(int i = 0 ; i < NREGISTERS ; i+=3)
   {
       printf("R%02d: 0x%08x\t%d\t", i, pmach->_registers[i], pmach->_registers[i]);
       if( (i+1) < NREGISTERS)
@@ -263,7 +266,17 @@ void print_cpu(Machine *pmach)
 	printf("R%02d: 0x%08x\t%d\n", i+2, pmach->_registers[i+2], pmach->_registers[i+2]);
       else
 	putchar('\n');
+  }*/
+  
+  for (int i = 0; i < NREGISTERS; i++) {
+  	printf("R%02d: 0%08x\t%d\t", i, pmach->_registers[i], pmach->_registers[i]);
+  	if (i % 3 == 2) {
+  		printf("\n");
+  	}
   }
+  
+  
+  
 }
 
 //! Affichage des données du programme
@@ -304,6 +317,9 @@ void simul(Machine *pmach, bool debug)
   //decode_execute retourne false si on est à la fin du programme :
   while (decode_execute(pmach, pmach->_text[pmach->_pc++]))
   {
+    if (pmach->_pc >= pmach->_textsize) {
+    	error(ERR_SEGTEXT, pmach->_pc - 1);
+    }
     //On trace l'exécution courrante :
     trace("Executing", pmach, pmach->_text[pmach->_pc], pmach->_pc);
     //Si on est en mode debug on ne fait qu'une ligne a la fois
