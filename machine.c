@@ -44,23 +44,23 @@ void read_program(Machine *pmach, const char *programfile)
     fprintf(stderr, "Erreur d'ouverture du fichier binaire dans <machine.c:read_program>");
 
   if( (bits_read = read(handle, &textsize, sizeof(pmach->_textsize))) != sizeof(pmach->_textsize))
-    fprintf(stderr, "Erreur de lecture de 'textsize' dans <machine.c:read_program> dans '%s': %d bits lus au lieu de %ld",programfile,bits_read,sizeof(textsize));
+    fprintf(stderr, "Erreur de lecture de 'textsize' dans <machine.c:read_program> dans '%s': %d bits lus au lieu de %d",programfile,bits_read,sizeof(textsize));
 
   if( (bits_read = read(handle, &datasize, sizeof(pmach->_datasize))) != sizeof(pmach->_datasize))
-    fprintf(stderr, "Erreur de lecture de 'datasize' dans <machine.c:read_program> dans '%s': %d bits lus au lieu de %ld",programfile,bits_read,sizeof(datasize));
+    fprintf(stderr, "Erreur de lecture de 'datasize' dans <machine.c:read_program> dans '%s': %d bits lus au lieu de %d",programfile,bits_read,sizeof(datasize));
 
   if( (bits_read = read(handle, &dataend, sizeof(pmach->_dataend))) != sizeof(pmach->_dataend))
-    fprintf(stderr, "Erreur de lecture de 'dataend' dans <machine.c:read_program> '%s': %d bits lus au lieu de %ld",programfile,bits_read,sizeof(dataend));
+    fprintf(stderr, "Erreur de lecture de 'dataend' dans <machine.c:read_program> '%s': %d bits lus au lieu de %d",programfile,bits_read,sizeof(dataend));
 
   Instruction *text = malloc(textsize * sizeof(Instruction));
   //lecture des instructions :
   if( (read(handle, text, textsize * sizeof(Instruction))) != (textsize * sizeof(Instruction)) )
-    fprintf(stderr, "Erreur de lecture de 'text' dans <machine.c:read_program>");
+    fprintf(stderr, "Erreur de lecture de 'text' dans <machine.c:read_program> '%s': %d bits lus au lieu de %d",programfile,bits_read,sizeof(dataend));
 
   Word *data = malloc(datasize * sizeof(Word));
   //lecture des données :
   if( (read(handle, data, datasize * sizeof(Word))) != (datasize * sizeof(Word)))
-    fprintf(stderr, "Erreur de lecture de 'data' dans <machine.c:read_program>");
+    fprintf(stderr, "Erreur de lecture de 'data' dans <machine.c:read_program> '%s': %d bits lus au lieu de %d",programfile,bits_read,sizeof(dataend));
 
   //Fermeture du fichier :
   if(close(handle) != 0)
@@ -128,9 +128,12 @@ void dump_memory(Machine *pmach)
   for(int i = 0 ; i < pmach->_textsize ; i++)
   {
     printf("\t0x%08x, ", pmach->_text[i]._raw);
-    if (i % 4 == 3 || (i == pmach->_textsize - 1) )
+    if (i % 4 == 3)
       putchar('\n');
   }
+  if (pmach->_textsize % 4 != 0)
+        printf("\n");
+
   printf("};\n");
   printf("unsigned textsize = %d;\n", pmach->_textsize);
 
@@ -142,31 +145,28 @@ void dump_memory(Machine *pmach)
     if (i % 4 == 3)
       putchar('\n');
   }
+  if (pmach->_datasize % 4 != 0)
+        printf("\n");
 
-  putchar('\n');
   printf("};\n");
   printf("unsigned datasize = %d;\n", pmach->_datasize);
   printf("unsigned dataend = %d;\n", pmach->_dataend);
 
   int bits_read=0;
   //Ouverture/creation du fichier en mode écriture seule + troncature
-  int handle = open("dump.bin", O_WRONLY|O_TRUNC|O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
+  int handle = open("dump.bin", O_WRONLY|O_TRUNC|O_CREAT, S_IRWXU|S_IRUSR|S_IWUSR|S_IXUSR|S_IRWXG|S_IRGRP|S_IWGRP|S_IXGRP|S_IRWXO|S_IROTH|S_IWOTH|S_IXOTH);
   if(handle < 0)
-    fprintf(stderr, "Erreur d'ouverture du fichier binaire dans <machine.c:read_program>");
+    fprintf(stderr, "Erreur d'ouverture du fichier binaire dans <machine.c:dump_memory>");
 
 
   if( (bits_read = write(handle, &pmach->_textsize, sizeof(pmach->_textsize))) != sizeof(pmach->_textsize))
-    fprintf(stderr, "Erreur d'écriture de 'textsize' dans <machine.c:dump_memory> : %d bits lus au lieu de %ld", bits_read, sizeof(pmach->_textsize));
+    fprintf(stderr, "Erreur d'écriture de 'textsize' dans <machine.c:dump_memory> : %d bits écrits au lieu de %d", bits_read, sizeof(pmach->_textsize));
   
   if( (bits_read = write(handle, &pmach->_datasize, sizeof(pmach->_datasize))) != sizeof(pmach->_datasize))
-    fprintf(stderr, "Erreur d'écriture de 'datasize' dans <machine.c:dump_memory> : %d bits lus au lieu de %ld", bits_read, sizeof(pmach->_datasize));
+    fprintf(stderr, "Erreur d'écriture de 'datasize' dans <machine.c:dump_memory> : %d bits écrits au lieu de %d", bits_read, sizeof(pmach->_datasize));
   
   if( (bits_read = write(handle, &pmach->_dataend, sizeof(pmach->_dataend))) != sizeof(pmach->_dataend))
-    fprintf(stderr, "Erreur d'écriture de 'dataend' dans <machine.c:dump_memory> : %d bits lus au lieu de %ld", bits_read, sizeof(pmach->_dataend));
-
-  //ecriture des données :
-  if( (bits_read = write(handle, &pmach->_data, sizeof(pmach->_data))) != sizeof(pmach->_data))
-    fprintf(stderr, "Erreur d'écriture de 'datasize' dans <machine.c:dump_memory> : %d bits lus au lieu de %ld", bits_read, sizeof(pmach->_datasize));
+    fprintf(stderr, "Erreur d'écriture de 'dataend' dans <machine.c:dump_memory> : %d bits écrits au lieu de %d", bits_read, sizeof(pmach->_dataend));
 
   //ecriture des instructions :
   for(int i = 0 ; i < pmach->_textsize ; i++)
@@ -174,10 +174,14 @@ void dump_memory(Machine *pmach)
     if( (bits_read = write(handle, &pmach->_text[i]._raw, sizeof(pmach->_text[0]._raw))) != sizeof(pmach->_text[0]._raw))
       fprintf(stderr, "Erreur d'écriture de 'instruc' dans <machine.c:dump_memory>.");
   }
+  
+  //ecriture des données :
+  if( (bits_read = write(handle, &pmach->_data, sizeof(pmach->_data))) != sizeof(pmach->_data))
+    fprintf(stderr, "Erreur d'écriture de 'datasize' dans <machine.c:dump_memory> : %d bits lus au lieu de %d", bits_read, sizeof(pmach->_datasize));
 
   //Fermeture du fichier :
   if(close(handle) != 0)
-    fprintf(stderr, "Erreur de fermeture du fichier binaire dans <machine.c:read_program>");
+    fprintf(stderr, "Erreur de fermeture du fichier binaire dans <machine.c:dump_memory>");
 }
 
 //! Affichage des instructions du programme
@@ -259,20 +263,20 @@ void print_data(Machine *pmach)
  */
 void simul(Machine *pmach, bool debug)
 {
-  bool stop=true;
+  bool stop = true;
   //decode_execute retourne false si on est à la fin du programme :
   while (stop)
-  {
-   
+  { 
     //On trace l'exécution courrante :
     trace("Executing", pmach, pmach->_text[pmach->_pc], pmach->_pc);
-     if (pmach->_pc >= pmach->_textsize) {
+    
+    if (pmach->_pc >= pmach->_textsize) {
     	error(ERR_SEGTEXT, pmach->_pc - 1);
     }
     stop = decode_execute(pmach, pmach->_text[pmach->_pc++]);
     
     //Si on est en mode debug on ne fait qu'une ligne a la fois
     if (debug)
-	    debug = debug_ask(pmach);
+	debug = debug_ask(pmach);
   }
 }
