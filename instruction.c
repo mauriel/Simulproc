@@ -54,31 +54,27 @@ void print_op(Instruction instr) {
  * \param addr son adresse
  */
 void print_instruction(Instruction instr, unsigned addr) {
+	printf("%s ", cop_names[instr.instr_generic._cop]);
 	switch (instr.instr_generic._cop) {
 		case ILLOP:
 		case NOP:
 		case RET:
 		case HALT:
-			// On indique que l'operateur.
-			printf("%s ",cop_names[instr.instr_generic._cop]); 
 			break;
 		case LOAD:
 		case STORE:
 		case ADD:
 		case SUB:
-			printf("%s ", cop_names[instr.instr_generic._cop]);
 			print_register(instr); 
 			print_op(instr);
 			break;
 		case BRANCH:
 		case CALL:
-			printf("%s ", cop_names[instr.instr_generic._cop]);
 			print_condition(instr);
 			print_op(instr);
 			break;
 		case PUSH:
 		case POP:
-			printf("%s ", cop_names[instr.instr_generic._cop]);
 			print_op(instr);
 			break;
 	}
