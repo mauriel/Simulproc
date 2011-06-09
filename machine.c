@@ -152,32 +152,32 @@ void dump_memory(Machine *pmach)
   printf("unsigned datasize = %d;\n", pmach->_datasize);
   printf("unsigned dataend = %d;\n", pmach->_dataend);
 
-  int bits_read=0;
+  int bits_written=0;
   //Ouverture/creation du fichier en mode écriture seule + troncature
   int handle = open("dump.bin", O_WRONLY|O_TRUNC|O_CREAT, S_IRWXU|S_IRUSR|S_IWUSR|S_IXUSR|S_IRWXG|S_IRGRP|S_IWGRP|S_IXGRP|S_IRWXO|S_IROTH|S_IWOTH|S_IXOTH);
   if(handle < 0)
     fprintf(stderr, "Erreur d'ouverture du fichier binaire dans <machine.c:dump_memory>");
 
 
-  if( (bits_read = write(handle, &pmach->_textsize, sizeof(pmach->_textsize))) != sizeof(pmach->_textsize))
-    fprintf(stderr, "Erreur d'écriture de 'textsize' dans <machine.c:dump_memory> : %d bits écrits au lieu de %ld", bits_read, sizeof(pmach->_textsize));
+  if( (bits_written = write(handle, &pmach->_textsize, sizeof(pmach->_textsize))) != sizeof(pmach->_textsize))
+    fprintf(stderr, "Erreur d'écriture de 'textsize' dans <machine.c:dump_memory> : %d bits écrits au lieu de %ld", bits_written, sizeof(pmach->_textsize));
   
-  if( (bits_read = write(handle, &pmach->_datasize, sizeof(pmach->_datasize))) != sizeof(pmach->_datasize))
-    fprintf(stderr, "Erreur d'écriture de 'datasize' dans <machine.c:dump_memory> : %d bits écrits au lieu de %ld", bits_read, sizeof(pmach->_datasize));
+  if( (bits_written = write(handle, &pmach->_datasize, sizeof(pmach->_datasize))) != sizeof(pmach->_datasize))
+    fprintf(stderr, "Erreur d'écriture de 'datasize' dans <machine.c:dump_memory> : %d bits écrits au lieu de %ld", bits_written, sizeof(pmach->_datasize));
   
-  if( (bits_read = write(handle, &pmach->_dataend, sizeof(pmach->_dataend))) != sizeof(pmach->_dataend))
-    fprintf(stderr, "Erreur d'écriture de 'dataend' dans <machine.c:dump_memory> : %d bits écrits au lieu de %ld", bits_read, sizeof(pmach->_dataend));
+  if( (bits_written = write(handle, &pmach->_dataend, sizeof(pmach->_dataend))) != sizeof(pmach->_dataend))
+    fprintf(stderr, "Erreur d'écriture de 'dataend' dans <machine.c:dump_memory> : %d bits écrits au lieu de %ld", bits_written, sizeof(pmach->_dataend));
 
   //ecriture des instructions :
   for(int i = 0 ; i < pmach->_textsize ; i++)
   {
-    if( (bits_read = write(handle, &pmach->_text[i]._raw, sizeof(pmach->_text[0]._raw))) != sizeof(pmach->_text[0]._raw))
+    if( (bits_written = write(handle, &pmach->_text[i]._raw, sizeof(pmach->_text[0]._raw))) != sizeof(pmach->_text[0]._raw))
       fprintf(stderr, "Erreur d'écriture de 'instruc' dans <machine.c:dump_memory>.");
   }
   
   //ecriture des données :
-  if( (bits_read = write(handle, &pmach->_data, pmach->_datasize * sizeof(Word))) != pmach->_datasize * sizeof(Word))
-    fprintf(stderr, "Erreur d'écriture de 'datasize' dans <machine.c:dump_memory> : %d bits lus au lieu de %ld", bits_read, pmach->_datasize * sizeof(Word));
+  if( (bits_written = write(handle, pmach->_data, pmach->_datasize * sizeof(Word))) != pmach->_datasize * sizeof(Word))
+    fprintf(stderr, "Erreur d'écriture de 'datasize' dans <machine.c:dump_memory> : %d bits lus au lieu de %ld", bits_written, pmach->_datasize * sizeof(Word));
 
   //Fermeture du fichier :
   if(close(handle) != 0)
