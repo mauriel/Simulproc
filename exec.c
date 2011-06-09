@@ -29,11 +29,12 @@ void refresh_cc(Machine *pmach, unsigned int reg)
  */
 void check_register(Instruction instr, unsigned addr) 
 {
-	if (instr.instr_generic._regcond < 0 || instr.instr_generic._regcond > NREGISTERS - 2)
+	if (instr.instr_generic._regcond < 0 || instr.instr_generic._regcond > NREGISTERS - 1)
 		error(ERR_ILLEGAL,addr);
 }
 
 //! Vérifie que le Stack Pointer (SP) ne dépasse pas la zone dédiée à la pile.
+//! Il ne faut pas par exemple qu'avec des branchements successifs, on efface les données existantes.
 /*!
  * \param pmach machine en cours d'exécution
  * \param addr adresse de l'instruction
@@ -61,18 +62,18 @@ void check_immediate(Instruction instr, unsigned addr)
  * \param instr instruction en cours
  * \param addr adresse de l'instruction
  */
-void check_condition(Instruction instr, unsigned addr) 
+/*void check_condition(Instruction instr, unsigned addr) 
 {
-	if (instr.instr_generic._regcond < 0 || instr.instr_generic._regcond > 7)
+	if (instr.instr_generic._regcond < 0 || instr.instr_generic._regcond >= 7)
 		error(ERR_CONDITION,addr);
-}
+}*/
 
 //! Vérifie si la condition de branchement est respectée.
 /*!
  * \param pmach machine en cours d'exécution
  * \param instr instruction en cours
  */
-bool allowed_condition(Machine *pmach, Instruction instr) 
+bool allowed_condition(Machine *pmach, Instruction instr, unsigned addr) 
 {
 	switch (instr.instr_generic._regcond) {
 	case NC: // Pas de condition
@@ -87,8 +88,10 @@ bool allowed_condition(Machine *pmach, Instruction instr)
 		return (pmach->_cc == CC_P || pmach->_cc == CC_Z);
 	case LT: // Strictement négatif
 		return (pmach->_cc == CC_N);
-	default: // Négatif ou nul
+	case LE: // Négatif ou nul
 		return (pmach->_cc == CC_N || pmach->_cc == CC_Z);
+	default:
+		error(ERR_CONDITION, addr);
 	}
 }
 
@@ -204,7 +207,7 @@ bool sub(Machine *pmach, Instruction instr,unsigned addr)
 }
 
 //! Décode et exécute l'instruction BRANCH.
-//! BRANCH accepte l'adressage absolu et indexé.
+//! BRANCH accepte l'adressage absolu et indexé pour l'adresse de l'instruction à exécuter.
 /*!
  * \param pmach machine en cours d'exécution
  * \param instr instruction en cours
@@ -213,16 +216,14 @@ bool sub(Machine *pmach, Instruction instr,unsigned addr)
 bool branch(Machine *pmach, Instruction instr, unsigned addr) 
 {
 	check_immediate(instr, addr);	
-	check_condition(instr, addr);	
 	unsigned int address = get_address(pmach, instr);
-	check_data_addr(pmach, address, addr);
-	if (allowed_condition(pmach,instr))
+	if (allowed_condition(pmach, instr, addr))
 		pmach->_pc = address;
 	return true;
 }
 
 //! Décode et exécute l'instruction CALL.
-//! CALL accepte l'adressage absolu et indexé.
+//! CALL accepte l'adressage absolu et indexé pour l'adresse du sous-programme.
 /*!
  * \param pmach machine en cours d'exécution
  * \param instr instruction en cours
@@ -231,11 +232,9 @@ bool branch(Machine *pmach, Instruction instr, unsigned addr)
 bool call(Machine *pmach, Instruction instr, unsigned addr) 
 {
 	check_immediate(instr, addr);	
-	check_condition(instr, addr);
 	check_stack(pmach,addr);	
 	unsigned int address = get_address(pmach, instr);
-	check_data_addr(pmach, address, addr);
-	if (allowed_condition(pmach,instr)) {
+	if (allowed_condition(pmach, instr, addr)) {
 		pmach->_data[pmach->_sp--] = pmach->_pc;
 		pmach->_pc = address;
 	}
