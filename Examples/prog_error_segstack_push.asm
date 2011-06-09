@@ -27,8 +27,14 @@ main    EQU *
         PUSH @op2  
 	PUSH @op1
         PUSH @op2    
-
-return  RET
+        PUSH @op1
+        PUSH @op2  
+	PUSH @op1
+        PUSH @op2
+        PUSH @op1
+        PUSH @op2  
+	PUSH @op1
+        PUSH @op2
         
         END
         
@@ -38,7 +44,6 @@ return  RET
         DATA 30
         
         WORD 0
-result  WORD 0
 op1     WORD 20
 op2     WORD 5
         
