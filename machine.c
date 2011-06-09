@@ -44,23 +44,23 @@ void read_program(Machine *pmach, const char *programfile)
     fprintf(stderr, "Erreur d'ouverture du fichier binaire dans <machine.c:read_program>");
 
   if( (bits_read = read(handle, &textsize, sizeof(pmach->_textsize))) != sizeof(pmach->_textsize))
-    fprintf(stderr, "Erreur de lecture de 'textsize' dans <machine.c:read_program> dans '%s': %d bits lus au lieu de %d",programfile,bits_read,sizeof(textsize));
+    fprintf(stderr, "Erreur de lecture de 'textsize' dans <machine.c:read_program> dans '%s': %d bits lus au lieu de %ld",programfile,bits_read,sizeof(textsize));
 
   if( (bits_read = read(handle, &datasize, sizeof(pmach->_datasize))) != sizeof(pmach->_datasize))
-    fprintf(stderr, "Erreur de lecture de 'datasize' dans <machine.c:read_program> dans '%s': %d bits lus au lieu de %d",programfile,bits_read,sizeof(datasize));
+    fprintf(stderr, "Erreur de lecture de 'datasize' dans <machine.c:read_program> dans '%s': %d bits lus au lieu de %ld",programfile,bits_read,sizeof(datasize));
 
   if( (bits_read = read(handle, &dataend, sizeof(pmach->_dataend))) != sizeof(pmach->_dataend))
-    fprintf(stderr, "Erreur de lecture de 'dataend' dans <machine.c:read_program> '%s': %d bits lus au lieu de %d",programfile,bits_read,sizeof(dataend));
+    fprintf(stderr, "Erreur de lecture de 'dataend' dans <machine.c:read_program> '%s': %d bits lus au lieu de %ld",programfile,bits_read,sizeof(dataend));
 
   Instruction *text = malloc(textsize * sizeof(Instruction));
   //lecture des instructions :
-  if( (read(handle, text, textsize * sizeof(Instruction))) != (textsize * sizeof(Instruction)) )
-    fprintf(stderr, "Erreur de lecture de 'text' dans <machine.c:read_program> '%s': %d bits lus au lieu de %d",programfile,bits_read,sizeof(dataend));
+  if( (bits_read = read(handle, text, textsize * sizeof(Instruction))) != (textsize * sizeof(Instruction)) )
+    fprintf(stderr, "Erreur de lecture de 'text' dans <machine.c:read_program> '%s': %d bits lus au lieu de %ld",programfile,bits_read,textsize * sizeof(Instruction));
 
   Word *data = malloc(datasize * sizeof(Word));
   //lecture des données :
-  if( (read(handle, data, datasize * sizeof(Word))) != (datasize * sizeof(Word)))
-    fprintf(stderr, "Erreur de lecture de 'data' dans <machine.c:read_program> '%s': %d bits lus au lieu de %d",programfile,bits_read,sizeof(dataend));
+  if( (bits_read = read(handle, data, datasize * sizeof(Word))) != (datasize * sizeof(Word)))
+    fprintf(stderr, "Erreur de lecture de 'data' dans <machine.c:read_program> '%s': %d bits lus au lieu de %ld",programfile,bits_read,datasize * sizeof(Word));
 
   //Fermeture du fichier :
   if(close(handle) != 0)
@@ -160,13 +160,13 @@ void dump_memory(Machine *pmach)
 
 
   if( (bits_read = write(handle, &pmach->_textsize, sizeof(pmach->_textsize))) != sizeof(pmach->_textsize))
-    fprintf(stderr, "Erreur d'écriture de 'textsize' dans <machine.c:dump_memory> : %d bits écrits au lieu de %d", bits_read, sizeof(pmach->_textsize));
+    fprintf(stderr, "Erreur d'écriture de 'textsize' dans <machine.c:dump_memory> : %d bits écrits au lieu de %ld", bits_read, sizeof(pmach->_textsize));
   
   if( (bits_read = write(handle, &pmach->_datasize, sizeof(pmach->_datasize))) != sizeof(pmach->_datasize))
-    fprintf(stderr, "Erreur d'écriture de 'datasize' dans <machine.c:dump_memory> : %d bits écrits au lieu de %d", bits_read, sizeof(pmach->_datasize));
+    fprintf(stderr, "Erreur d'écriture de 'datasize' dans <machine.c:dump_memory> : %d bits écrits au lieu de %ld", bits_read, sizeof(pmach->_datasize));
   
   if( (bits_read = write(handle, &pmach->_dataend, sizeof(pmach->_dataend))) != sizeof(pmach->_dataend))
-    fprintf(stderr, "Erreur d'écriture de 'dataend' dans <machine.c:dump_memory> : %d bits écrits au lieu de %d", bits_read, sizeof(pmach->_dataend));
+    fprintf(stderr, "Erreur d'écriture de 'dataend' dans <machine.c:dump_memory> : %d bits écrits au lieu de %ld", bits_read, sizeof(pmach->_dataend));
 
   //ecriture des instructions :
   for(int i = 0 ; i < pmach->_textsize ; i++)
@@ -176,8 +176,8 @@ void dump_memory(Machine *pmach)
   }
   
   //ecriture des données :
-  if( (bits_read = write(handle, &pmach->_data, sizeof(pmach->_data))) != sizeof(pmach->_data))
-    fprintf(stderr, "Erreur d'écriture de 'datasize' dans <machine.c:dump_memory> : %d bits lus au lieu de %d", bits_read, sizeof(pmach->_datasize));
+  if( (bits_read = write(handle, &pmach->_data, pmach->_datasize * sizeof(Word))) != pmach->_datasize * sizeof(Word))
+    fprintf(stderr, "Erreur d'écriture de 'datasize' dans <machine.c:dump_memory> : %d bits lus au lieu de %ld", bits_read, pmach->_datasize * sizeof(Word));
 
   //Fermeture du fichier :
   if(close(handle) != 0)
