@@ -216,9 +216,10 @@ bool sub(Machine *pmach, Instruction instr,unsigned addr)
 bool branch(Machine *pmach, Instruction instr, unsigned addr) 
 {
 	check_immediate(instr, addr);	
-	unsigned int address = get_address(pmach, instr);
-	if (allowed_condition(pmach, instr, addr))
+	if (allowed_condition(pmach, instr, addr)) {
+		unsigned int address = get_address(pmach, instr);
 		pmach->_pc = address;
+	}
 	return true;
 }
 
@@ -232,10 +233,11 @@ bool branch(Machine *pmach, Instruction instr, unsigned addr)
 bool call(Machine *pmach, Instruction instr, unsigned addr) 
 {
 	check_immediate(instr, addr);	
-	check_stack(pmach,addr);	
-	unsigned int address = get_address(pmach, instr);
+	check_stack(pmach, addr);
+	
 	if (allowed_condition(pmach, instr, addr)) {
 		pmach->_data[pmach->_sp--] = pmach->_pc;
+		unsigned int address = get_address(pmach, instr);
 		pmach->_pc = address;
 	}
 	return true;
@@ -264,6 +266,7 @@ bool ret(Machine *pmach, Instruction instr, unsigned addr) {
  */
 bool push(Machine *pmach, Instruction instr, unsigned addr) 
 {
+	check_stack(pmach, addr);
 	if (instr.instr_generic._immediate) { // Immediat
 		pmach->_data[pmach->_sp--] = instr.instr_immediate._value;
 	} else {
@@ -271,7 +274,7 @@ bool push(Machine *pmach, Instruction instr, unsigned addr)
 		check_data_addr(pmach, address, addr);
 		pmach->_data[pmach->_sp--] = pmach->_data[address];	
 	}
-	check_stack(pmach, addr);
+	
 	return true;
 }
 
