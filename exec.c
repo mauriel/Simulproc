@@ -22,17 +22,6 @@ void refresh_cc(Machine *pmach, unsigned int reg)
         	pmach->_cc = CC_Z;
 }
 
-//! Vérifie le numéro de registre.
-/*!
- * \param instr instruction en cours
- * \param addr adresse de l'instruction
- */
-void check_register(Instruction instr, unsigned addr) 
-{
-	if (instr.instr_generic._regcond < 0 || instr.instr_generic._regcond > NREGISTERS - 1)
-		error(ERR_ILLEGAL,addr);
-}
-
 //! Vérifie que le Stack Pointer (SP) ne dépasse pas la zone dédiée à la pile.
 //! Il ne faut pas par exemple qu'avec des branchements successifs, on efface les données existantes.
 /*!
@@ -56,17 +45,6 @@ void check_immediate(Instruction instr, unsigned addr)
 	if (instr.instr_generic._immediate)
 		error(ERR_IMMEDIATE,addr);
 }
-
-//! Vérifie qu'il n'y a pas d'erreurs sur le code condition (=> condition inconnue)
-/*!
- * \param instr instruction en cours
- * \param addr adresse de l'instruction
- */
-/*void check_condition(Instruction instr, unsigned addr) 
-{
-	if (instr.instr_generic._regcond < 0 || instr.instr_generic._regcond >= 7)
-		error(ERR_CONDITION,addr);
-}*/
 
 //! Vérifie si la condition de branchement est respectée.
 /*!
@@ -130,7 +108,6 @@ void check_data_addr(Machine *pmach, unsigned int data_addr, unsigned addr)
  */
 bool load(Machine *pmach, Instruction instr, unsigned addr) 
 {
-	check_register(instr, addr);
 	if (instr.instr_generic._immediate) { // Si I = 1 : Immediat
 		pmach->_registers[instr.instr_generic._regcond] = instr.instr_immediate._value;
 	} else {
@@ -152,9 +129,7 @@ bool load(Machine *pmach, Instruction instr, unsigned addr)
  */
 bool store(Machine *pmach, Instruction instr, unsigned addr) 
 {
-	check_immediate(instr, addr);	
-	check_register(instr, addr);	
-	
+	check_immediate(instr, addr);		
 	unsigned int address = get_address(pmach, instr);
 	check_data_addr(pmach, address, addr);
 	pmach->_data[address] = pmach->_registers[instr.instr_generic._regcond];
@@ -172,7 +147,6 @@ bool store(Machine *pmach, Instruction instr, unsigned addr)
  */
 bool add(Machine *pmach, Instruction instr, unsigned addr) 
 {
-	check_register(instr, addr);
 	if (instr.instr_generic._immediate) { // Immediat
 		pmach->_registers[instr.instr_generic._regcond] += instr.instr_immediate._value;
 	} else {				
@@ -194,7 +168,6 @@ bool add(Machine *pmach, Instruction instr, unsigned addr)
  */
 bool sub(Machine *pmach, Instruction instr,unsigned addr) 
 {
-	check_register(instr, addr);
 	if (instr.instr_generic._immediate) { // Immediat
 		pmach->_registers[instr.instr_generic._regcond] -= instr.instr_immediate._value;
 	} else {				
